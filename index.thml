@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deriv OAuth Callback</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 0;
+            padding: 2rem 1rem;
+            background: #0e0e0e;
+            color: #ffffff;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 640px;
+            margin: 0 auto;
+            background: #1e1e1e;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+        }
+        h1 { margin-top: 0; font-size: 1.5rem; }
+        .info {
+            margin-bottom: 1rem;
+        }
+        .label {
+            color: #888;
+            font-size: 0.85em;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.25rem;
+        }
+        .value {
+            word-break: break-all;
+            background: #2a2a2a;
+            padding: 0.75rem;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 0.95em;
+        }
+        button {
+            background: #ff444f;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-top: 1rem;
+            transition: background 0.2s;
+        }
+        button:hover { background: #e03e48; }
+        button.copied { background: #28a745; }
+        .hidden { display: none; }
+        .note {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: #2a2a2a;
+            border-left: 4px solid #ff444f;
+            border-radius: 4px;
+            font-size: 0.9em;
+            color: #ccc;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Otorisasi Deriv</h1>
+        <p>Halaman ini menerima callback dari Deriv. Parameter berikut terdeteksi di URL:</p>
+
+        <div id="params-container"></div>
+
+        <div id="no-params" class="hidden">
+            <p>Tidak ada parameter callback yang terdeteksi.</p>
+            <p>Silakan mulai proses otorisasi dari aplikasi Anda.</p>
+        </div>
+
+        <button id="copy-btn" class="hidden">Salin Informasi Token</button>
+
+        <div class="note">
+            <strong>Catatan:</strong> Jangan bagikan token ini kepada siapa pun.
+            Halaman ini hanya menampilkan parameter untuk keperluan debugging.
+            Untuk penggunaan produksi, kirim kode/token ke backend aman Anda untuk diproses.
+        </div>
+    </div>
+
+    <script>
+        function getQueryParams() {
+            const params = new URLSearchParams(window.location.search);
+            const result = {};
+            for (const [key, value] of params.entries()) {
+                result[key] = value;
+            }
+            return result;
+        }
+
+        function displayParams() {
+            const params = getQueryParams();
+            const container = document.getElementById('params-container');
+            const noParams = document.getElementById('no-params');
+            const copyBtn = document.getElementById('copy-btn');
+
+            // Filter parameter yang relevan dengan callback Deriv
+            const relevantKeys = Object.keys(params).filter(key =>
+                key.startsWith('acct') ||
+                key.startsWith('token') ||
+                key.startsWith('cur') ||
+                key === 'code' ||
+                key === 'state' ||
+                key === 'error' ||
+                key === 'error_description'
+            );
+
+            if (relevantKeys.length === 0) {
+                noParams.classList.remove('hidden');
+                copyBtn.classList.add('hidden');
+                return;
+            }
+
+            relevantKeys.sort();
+
+            relevantKeys.forEach(key => {
+                const div = document.createElement('div');
+                div.className = 'info';
+
+                const label = document.createElement('div');
+                label.className = 'label';
+                label.textContent = key;
+
+                const value = document.createElement('div');
+                value.className = 'value';
+                value.textContent = params[key];
+
+                div.appendChild(label);
+                div.appendChild(value);
+                container.appendChild(div);
+            });
+
+            copyBtn.classList.remove('hidden');
+
+            copyBtn.addEventListener('click', () => {
+                const allValues = relevantKeys.map(key => `${key}=${params[key]}`).join('\n');
+                navigator.clipboard.writeText(allValues).then(() => {
+                    copyBtn.textContent = 'Tersalin!';
+                    copyBtn.classList.add('copied');
+                    setTimeout(() => {
+                        copyBtn.textContent = 'Salin Informasi Token';
+                        copyBtn.classList.remove('copied');
+                    }, 2000);
+                }).catch(() => {
+                    // Fallback jika clipboard API tidak tersedia
+                    alert('Gagal menyalin. Silakan salin manual dari kotak di atas.');
+                });
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', displayParams);
+    </script>
+</body>
+</html>
