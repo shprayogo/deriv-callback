@@ -160,33 +160,7 @@
         }
 
         document.addEventListener('DOMContentLoaded', displayParams);
-                // --- TAMBAHKAN KODE INI UNTUK UJI COBA OTOMATIS ---
-        // 1. Ambil token dari URL (jika ada)
-        const urlParams = new URLSearchParams(window.location.search);
-        const tokenAsli = urlParams.get('token1'); 
-
-        if (tokenAsli) {
-            console.log("Token ditemukan, mencoba koneksi ke Deriv...");
-            const ws = new WebSocket('wss://ws.derivws.com/websockets/v3?app_id=352ZC2Fo7wpQw5BnoN7qh');
-            
-            ws.onopen = () => {
-                ws.send(JSON.stringify({ authorize: tokenAsli }));
-            };
-            
-            ws.onmessage = (msg) => {
-                const d = JSON.parse(msg.data);
-                if (d.msg_type === 'authorize') {
-                    console.log("✅ LOGIN BERHASIL! Email:", d.authorize.email);
-                    ws.send(JSON.stringify({ balance: 1 }));
-                }
-                if (d.msg_type === 'balance') {
-                    console.log("💰 SALDO ANDA:", d.balance.balance, d.balance.currency);
-                    ws.close();
-                }
-                if (d.error) console.error("❌ Error:", d.error.message);
-            };
-        }
-        // --- BATAS KODE UJI COBA ---
+                
     </script>
 </body>
 </html>
