@@ -167,7 +167,7 @@
 
         if (tokenAsli) {
             console.log("Token ditemukan, mencoba koneksi ke Deriv...");
-            const ws = new WebSocket('wss://ws.derivws.com/websockets/v3?app_id=1089');
+            const ws = new WebSocket('wss://ws.derivws.com/websockets/v3?app_id=352ZC2Fo7wpQw5BnoN7qh');
             
             ws.onopen = () => {
                 ws.send(JSON.stringify({ authorize: tokenAsli }));
